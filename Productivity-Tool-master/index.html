@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/5f59ca6ad3.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="protool.css">
+</head>
+
+<body>
+    <title>PRODUCTIVITY TOOL</title>
+    <div class="todos-bg-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="todos-heading">PRODUCTIVITY TOOL</h1>
+                    <hr>
+                    <h1 class="create-task-heading">
+                        Create <span class="create-task-heading-subpart"> a Task</span>
+                    </h1>
+                    <input type="text" id="todoUserInput" class="todo-user-input" placeholder="What needs to be done?" />
+                    <button class="add-todo-button" id="addTodoButton">Add</button>
+                    <h1 class="todo-items-heading">
+                        <hr>
+                        My <span class="todo-items-heading-subpart">Tasks</span>
+                    </h1>
+                    <ul class="todo-items-container" id="todoItemsContainer"></ul>
+                    <button class="add-todo-button" id="saveTodoButton">Save</button>
+                    <hr>
+                    <h1 class="create-task-heading">
+                        Create <span class="create-task-heading-subpart"> a Note</span>
+                    </h1>
+                    <form id="noteForm">
+                        <label for="note-title">Title:</label>
+                        <input type="text" id="note-title" name="note-title">
+                        <label for="note-content">Content:</label>
+                        <textarea id="note-content" name="note-content"></textarea>
+                        <button class="add-todo-button" type="submit">Save Note</button>
+                    </form>
+                    <hr>
+                    <title>My Notes</title>
+                    <h1 class="todo-items-heading">
+                        My <span class="todo-items-heading-subpart">Notes</span>
+                    </h1>
+                    <ul id="notes-list"></ul>
+                    
+                    <script>
+                        const noteForm = document.getElementById("noteForm");
+                        const notesList = document.getElementById("notes-list");
+                
+                        // Load notes from local storage
+                        const savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+                        savedNotes.forEach((note) => {
+                            const noteElement = createNoteElement(note.title, note.content);
+                            notesList.appendChild(noteElement);
+                        });
+                
+                        // Add event listener for submitting note form
+                        noteForm.addEventListener("submit", function (e) {
+                            e.preventDefault(); // prevent default form submission
+                            const title = e.target.elements["note-title"].value; // get note title
+                            const content = e.target.elements["note-content"].value; // get note content
+                            if (title.trim() !== "" && content.trim() !== "") {
+                                // check if title and content are not empty
+                                const noteElement = createNoteElement(title, content);
+                                notesList.appendChild(noteElement);
+                                saveNoteToLocalStorage(title, content);
+                                e.target.reset(); // reset form fields
+                            }
+                        });
+                
+                        // Function to create a new note element
+                        function createNoteElement(title, content) {
+                            const note = document.createElement("li"); // create list item for note
+                            const noteTitle = document.createElement("h3"); // create heading for note title
+                            const noteContent = document.createElement("p"); // create paragraph for note content
+                            noteTitle.textContent = title; // set title text content
+                            noteContent.textContent = content; // set content text content
+                            note.appendChild(noteTitle); // append title to note list item
+                            note.appendChild(noteContent); // append content to note list item
+                
+                            const deleteButton = document.createElement("button"); // create delete button
+                            deleteButton.textContent = "Delete"; // set delete button text content
+                            deleteButton.style.backgroundColor="#4c63b6";    //styling delete button
+                            deleteButton.style.padding="10px 15px";
+                            deleteButton.style.borderRadius="4px";
+                            deleteButton.style.color="white";
+                            deleteButton.style.border="none";
+                            deleteButton.style.float = "right"; // Align the button to the right
+                            deleteButton.style.marginRight = "10px"; // Add some right margin for spacing
+                            deleteButton.style.position = "relative"; // Set position property to relative
+                            deleteButton.style.top = "-40px"; // Lift the button 10 pixels upwards
+                            deleteButton.style.transition = "background-color 0.3s ease"; // Add transition effect for smooth hover
+                            deleteButton.addEventListener("mouseover", () => {
+                                  deleteButton.style.backgroundColor = "#3e4d80"; // Update background color on hover
+                                });
+                                deleteButton.addEventListener("mouseout", () => {
+                                    deleteButton.style.backgroundColor = "#4c63b6"; // Reset background color on hover out
+                                });
+                            deleteButton.addEventListener("click", function () {
+                                // add event listener to delete button
+                                note.remove(); // remove note from DOM
+                                deleteNoteFromLocalStorage(title, content); // delete note from local storage
+                            });
+                            note.appendChild(deleteButton); // append delete button to note list item
+                
+                            return note;
+                        }
+                
+                        // Function to save note to local storage
+                        function saveNoteToLocalStorage(title, content) {
+                            const note = { title, content };
+                            const savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+                            savedNotes.push(note);
+                            localStorage.setItem("notes", JSON.stringify(savedNotes));
+                        }
+                
+                        // Function to delete note from local storage
+                        function deleteNoteFromLocalStorage(title, content) {
+                            const savedNotes = JSON.parse(localStorage.getItem("notes")) || [];
+                            const updatedNotes = savedNotes.filter(
+                                (note) => note.title !== title || note.content !== content
+                            );
+                            localStorage.setItem("notes", JSON.stringify(updatedNotes));
+                        }
+                    </script>
+                    
+                    
+
+                    
+                    <hr>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>    
+<script src="protool.js" charset="UTF-8"></script>  
+</body>
+
+</html>
